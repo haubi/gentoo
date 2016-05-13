@@ -36,6 +36,12 @@ MULTILIB_CHOST_TOOLS=(
 	/usr/bin/libgcrypt-config
 )
 
+src_prepare() {
+	# missing attribute(sysv_abi) for Cygwin?
+	[[ ${CHOST} == *-cygwin* ]] && rm -f mpi/*/*.S
+	autotools-multilib_src_prepare
+}
+
 multilib_src_configure() {
 	if [[ ${CHOST} == *86*-solaris* ]] ; then
 		# ASM code uses GNU ELF syntax, divide in particular, we need to
@@ -57,12 +63,14 @@ multilib_src_configure() {
 		# causes bus-errors on sparc64-solaris
 		$([[ ${CHOST} == *86*-darwin* ]] && echo "--disable-asm")
 		$([[ ${CHOST} == sparcv9-*-solaris* ]] && echo "--disable-asm")
+		# no cygwin patch yet
+		$([[ ${CHOST} == *-cygwin* ]] && echo gcry_cv_gcc_win64_platform_as_ok=no)
 	)
 	autotools-utils_src_configure
 }
 
 multilib_src_compile() {
-	emake
+	emake no_undefined=-no-undefined
 	multilib_is_native_abi && use doc && VARTEXFONTS="${T}/fonts" emake -C doc gcrypt.pdf
 }
 
