@@ -48,6 +48,9 @@ src_prepare() {
 	eapply "${FILESDIR}"/${PN}-1.1.28-simplify-python.patch
 	eapply "${FILESDIR}"/${PN}-1.1.28-disable-static-modules.patch
 
+	# Cygwin needs -no-undefined for shared modules
+	eapply "${FILESDIR}"/${PN}-1.1.28-no-undefined.patch
+
 	mv configure.{in,ac} || die
 
 	eautoreconf

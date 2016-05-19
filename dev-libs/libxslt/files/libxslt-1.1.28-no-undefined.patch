@@ -1,0 +1,80 @@
+https://bugzilla.gnome.org/show_bug.cgi?id=766669
+
+diff --git a/configure.in b/configure.in
+index d055979..1106e37 100644
+--- a/configure.in
++++ b/configure.in
+@@ -632,21 +632,15 @@ LIBXSLT_DEFAULT_PLUGINS_PATH="$expanded_libdir/libxslt-plugins"
+ AC_SUBST(LIBXSLT_DEFAULT_PLUGINS_PATH)
+ 
+ WIN32_EXTRA_LIBADD=
+-WIN32_EXTRA_LDFLAGS=
+ case "$host" in
+- *-*-cygwin*)
+- WIN32_EXTRA_LDFLAGS="-no-undefined"
+- ;;
+  *-*-mingw*)
+  WIN32_EXTRA_LIBADD="-lwsock32"
+- WIN32_EXTRA_LDFLAGS="-no-undefined"
+  AC_DEFINE([_WINSOCKAPI_],1,[Using the Win32 Socket implementation])
+  AC_DEFINE([snprintf],[_snprintf],[Win32 Std C name mangling work-around])
+  AC_DEFINE([vsnprintf],[_vsnprintf],[Win32 Std C name mangling work-around])
+  ;;
+ esac
+ AC_SUBST(WIN32_EXTRA_LIBADD)
+-AC_SUBST(WIN32_EXTRA_LDFLAGS)
+ 
+ 
+ AC_SUBST(XSLTPROCDV)
+diff --git a/libexslt/Makefile.am b/libexslt/Makefile.am
+index 1cf5138..ec69124 100644
+--- a/libexslt/Makefile.am
++++ b/libexslt/Makefile.am
+@@ -28,7 +28,7 @@ libexslt_la_SOURCES =                   \
+ 	dynamic.c
+ 
+ libexslt_la_LIBADD = $(top_builddir)/libxslt/libxslt.la $(EXTRA_LIBS) $(LIBGCRYPT_LIBS)
+-libexslt_la_LDFLAGS = $(WIN32_EXTRA_LDFLAGS) -version-info $(LIBEXSLT_VERSION_INFO)
++libexslt_la_LDFLAGS = -no-undefined -version-info $(LIBEXSLT_VERSION_INFO)
+ 
+ man_MANS = libexslt.3
+ 
+diff --git a/libxslt/Makefile.am b/libxslt/Makefile.am
+index d9fed68..cd65fa3 100644
+--- a/libxslt/Makefile.am
++++ b/libxslt/Makefile.am
+@@ -64,7 +64,7 @@ endif
+ 
+ libxslt_la_LIBADD = $(LIBXML_LIBS) $(EXTRA_LIBS)
+ libxslt_la_LDFLAGS =					\
+-		$(WIN32_EXTRA_LDFLAGS)			\
++		-no-undefined				\
+ 		$(LIBXSLT_VERSION_SCRIPT)		\
+ 		-version-info $(LIBXSLT_VERSION_INFO)
+ 
+diff --git a/python/Makefile.am b/python/Makefile.am
+index fa58b78..314ca36 100644
+--- a/python/Makefile.am
++++ b/python/Makefile.am
+@@ -19,7 +19,7 @@
+ libxsltmod_la_SOURCES = libxslt.c types.c
+ nodist_libxsltmod_la_SOURCES = libxslt-py.c
+ libxsltmod_la_LIBADD = $(mylibs) $(PYTHON_LIBS)
+-libxsltmod_la_LDFLAGS =  $(WIN32_EXTRA_LDFLAGS) $(PYTHON_LDFLAGS) -module -avoid-version -shared
++libxsltmod_la_LDFLAGS = -no-undefined $(PYTHON_LDFLAGS) -module -avoid-version -shared
+ 
+ libxslt.py: $(srcdir)/libxsl.py libxsltclass.py
+ 	cat $(srcdir)/libxsl.py libxsltclass.py > $@
+diff --git a/tests/plugins/Makefile.am b/tests/plugins/Makefile.am
+index e0736ab..48d5424 100644
+--- a/tests/plugins/Makefile.am
++++ b/tests/plugins/Makefile.am
+@@ -21,7 +21,7 @@ plugindir = $(abs_builddir)/.libs
+ xmlsoft_org_xslt_testplugin_la_CFLAGS = -DMODULE_COMPILE $(LIBXML_CFLAGS) $(LIBXSLT_CFLAGS)
+ xmlsoft_org_xslt_testplugin_la_SOURCES = testplugin.c
+ xmlsoft_org_xslt_testplugin_la_LIBADD = $(top_builddir)/libxslt/libxslt.la $(EXTRA_LIBS)
+-xmlsoft_org_xslt_testplugin_la_LDFLAGS = -module -avoid-version -rpath $(plugindir)
++xmlsoft_org_xslt_testplugin_la_LDFLAGS = -no-undefined -module -avoid-version -rpath $(plugindir)
+ 
+ test-logall:
+ 	@echo '## Running plugin tests'
